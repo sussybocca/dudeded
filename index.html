@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevHub Studio</title>
+  <style>
+    :root {
+      --primary: #0078ff;
+      --bg: #0d1117;
+      --nav-bg: #161b22;
+      --text: #fff;
+      --text-dim: #aaa;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Inter", sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Loader */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 100;
+      transition: opacity 0.6s ease;
+    }
+
+    .loader {
+      border: 6px solid rgba(255, 255, 255, 0.1);
+      border-left-color: var(--primary);
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .brand {
+      margin-top: 20px;
+      font-size: 1.8rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Navbar */
+    nav {
+      background: var(--nav-bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid #222;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    nav button:hover,
+    nav button.active {
+      color: var(--primary);
+    }
+
+    /* Frame */
+    iframe {
+      border: none;
+      flex-grow: 1;
+      width: 100%;
+      background: var(--bg);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Loader -->
+  <div id="loading-screen">
+    <div class="loader"></div>
+    <div class="brand">DevHub Studio</div>
+  </div>
+
+  <!-- Tabs (hidden until verified) -->
+  <nav id="navbar" style="display: none;">
+    <button class="active" onclick="openTab('base.html', this)">Base</button>
+    <button onclick="openTab('editor.html', this)">Editor</button>
+    <button onclick="openTab('games.html', this)">Games</button>
+    <button onclick="openTab('run.html', this)">Run</button>
+  </nav>
+  <iframe id="content-frame"></iframe>
+
+  <script>
+    const loader = document.getElementById("loading-screen");
+    const navbar = document.getElementById("navbar");
+    const frame = document.getElementById("content-frame");
+
+    // Simulate loading screen
+    setTimeout(() => {
+      loader.classList.add("fade-out");
+      setTimeout(checkUserStatus, 600);
+    }, 2000);
+
+    function checkUserStatus() {
+      const registered = localStorage.getItem("registered");
+      const verified = localStorage.getItem("verified");
+
+      // Redirect logic
+      if (!registered) {
+        window.location.href = "register.html"; // redirect to register
+        return;
+      }
+
+      if (registered && !verified) {
+        window.location.href = "verify.html"; // redirect to verify
+        return;
+      }
+
+      // If verified -> show main interface with tabs
+      navbar.style.display = "flex";
+      frame.src = "base.html";
+    }
+
+    function openTab(page, btn) {
+      frame.src = page;
+      document.querySelectorAll("nav button").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+    }
+  </script>
+</body>
+</html>

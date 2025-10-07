@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Games</h2>
+  <ul>
+    {% for g in games %}
+      <li>{{ g.id }} - files: {{ g.files|join(', ') }} - <a href="/run/{{ g.id }}">Run</a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}

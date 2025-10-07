@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Monaco Python Editor (Pyodide)</h2>
+  <button id="run-btn">Run (Ctrl+Enter)</button>
+  <div id="editor" style="height:60vh;border:1px solid #ccc"></div>
+  <div id="output" style="height:20vh;background:#111;color:#0f0;padding:10px;overflow:auto">Output will appear here...</div>
+
+  <form id="upload-form" style="margin-top:10px">
+    <input type="file" id="file" name="file">
+    <input type="text" id="filename" name="filename" placeholder="filename (optional)" />
+    <button id="submit-btn" type="button">Submit to server</button>
+  </form>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.49.0/min/vs/loader.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+  <script>
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.49.0/min/vs' } });
+    require(['vs/editor/editor.main'], async function() {
+      const editor = monaco.editor.create(document.getElementById('editor'), {
+        value: `print("Hello from Python (local)!")\nfor i in range(5):\n    print(i)`,
+        language: 'python', theme: 'vs-dark', automaticLayout: true
+      });
+
+      const pyodide = await loadPyodide();
+      const outputDiv = document.getElementById('output');
+
+      async function runCodeLocal() {
+        const code = editor.getValue();
+        outputDiv.textContent = 'Running locally...\n';
+        try {
+          let result = await pyodide.runPythonAsync(code);
+          if (result !== undefined) outputDiv.textContent += result + '\n';
+        } catch (err) { outputDiv.textContent += err + '\n'; }
+      }
+
+      document.getElementById('run-btn').onclick = runCodeLocal;
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, runCodeLocal);
+
+      document.getElementById('submit-btn').onclick = async function() {
+        const fileInput = document.getElementById('file');
+        const filename = document.getElementById('filename').value || 'app.py';
+        const form = new FormData();
+        form.append('filename', filename);
+        if (fileInput.files.length) {
+          form.append('file', fileInput.files[0]);
+        } else {
+          form.append('code', editor.getValue());
+        }
+        outputDiv.textContent = 'Submitting to server...\n';
+        const res = await fetch('/submit', { method: 'POST', body: form });
+        const data = await res.json();
+        if (res.ok) {
+          outputDiv.textContent += 'Game ID: ' + data.game_id + '\n' + data.output;
+        } else {
+          outputDiv.textContent += JSON.stringify(data);
+        }
+      };
+    });
+  </script>
+{% endblock %}

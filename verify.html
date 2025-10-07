@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Verify {{ username }}</h2>
+  <form method="post">
+    <label>Code: <input name="code"></label><br>
+    <button type="submit">Verify</button>
+  </form>
+{% endblock %}
