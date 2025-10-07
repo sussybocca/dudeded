@@ -6,23 +6,40 @@
     <title>cass game</title>
     <style>
       body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-      header { background: #222; color: white; padding: 10px 20px; }
+      header { background: #222; color: white; padding: 0 20px; }
       main { padding: 20px; }
       .flash { background: #fffae6; padding: 10px; border: 1px solid #ffd; margin-bottom: 10px; }
-      nav a { color: #ddd; margin-right: 10px; }
+
+      /* Tabs */
+      .tabs { display: flex; gap: 8px; align-items: center; padding: 0; margin: 0; list-style: none; }
+      .tab { display: inline-block; padding: 12px 16px; color: #ddd; text-decoration: none; border-bottom: 3px solid transparent; }
+      .tab:hover { color: #fff; }
+      .tab.active { color: #fff; background: linear-gradient(#333, #2a2a2a); border-bottom-color: #ffcc00; }
+      .header-inner { display: flex; align-items: center; justify-content: space-between; max-width: 1100px; margin: 0 auto; }
+      .auth { font-size: 0.95rem; }
+      .auth a { color: #ddd; margin-left: 10px; text-decoration: none; }
+      .auth a:hover { color: #fff; }
     </style>
   </head>
   <body>
     <header>
-      <nav>
-        <a href="/editor">Editor</a> |
-        <a href="/games">Games</a> |
-        {% if session.user %}
-          <strong>{{ session.user }}</strong> <a href="/logout">Logout</a>
-        {% else %}
-          <a href="/login">Login</a> <a href="/register">Register</a>
-        {% endif %}
-      </nav>
+      <div class="header-inner">
+        {# determine current path safely #}
+        {% set _path = request.path if request else '' %}
+        <ul class="tabs" role="tablist" aria-label="Cass game navigation">
+          <li><a role="tab" href="/editor" class="tab {% if _path.startswith('/editor') %}active{% endif %}">Editor</a></li>
+          <li><a role="tab" href="/games"  class="tab {% if _path.startswith('/games') %}active{% endif %}">Games</a></li>
+          <li><a role="tab" href="/run"    class="tab {% if _path.startswith('/run') %}active{% endif %}">Run</a></li>
+        </ul>
+
+        <div class="auth">
+          {% if session.user %}
+            <strong>{{ session.user }}</strong> <a href="/logout">Logout</a>
+          {% else %}
+            <a href="/login">Login</a> <a href="/register">Register</a>
+          {% endif %}
+        </div>
+      </div>
     </header>
     <main>
       {% with messages = get_flashed_messages() %}
